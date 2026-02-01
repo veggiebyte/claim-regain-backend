@@ -5,11 +5,11 @@ const FoundItem = require('../models/founditem.js');
 
 // ========== Public Routes (no auth required) ==========
 
-// GET /founditems - List all found items (public view with limited info)
+// GET /founditems - List all found items (public view - VAGUE descriptions only)
 router.get('/', async (req, res) => {
     try {
         const foundItems = await FoundItem.find({ status: 'FOUND' })
-            .select('title category color publicDescription dateFound locationFound')
+            .select('publicDescription category color dateFound locationFound _id')
             .sort({ createdAt: -1 });
         res.status(200).json(foundItems);
     } catch (error) {
@@ -17,11 +17,11 @@ router.get('/', async (req, res) => {
     }
 });
 
-// GET /founditems/:id - Get single item details (public)
+// GET /founditems/:id - Get single item details (public - VAGUE only)
 router.get('/:id', async (req, res) => {
     try {
         const foundItem = await FoundItem.findById(req.params.id)
-            .select('title category color publicDescription dateFound locationFound verificationQuestions');
+            .select('publicDescription category color dateFound locationFound verificationQuestions _id');
         if (!foundItem) {
             return res.status(404).json({ error: 'Item not found' });
         }
@@ -40,6 +40,36 @@ router.get('/:id', async (req, res) => {
 
 // ========== Protected Routes (auth required) ==========
 router.use(verifyToken);
+
+// GET /founditems/staff/all - STAFF view with ALL details
+router.get('/staff/all', async (req, res) => {
+    try {
+        if (req.user.role !== 'STAFF') {
+            return res.status(403).json({ error: 'Only staff can view full details' });
+        }
+        const foundItems = await FoundItem.find()
+            .sort({ createdAt: -1 });
+        res.status(200).json(foundItems);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// GET /founditems/staff/:id - STAFF view single item with ALL details
+router.get('/staff/:id', async (req, res) => {
+    try {
+        if (req.user.role !== 'STAFF') {
+            return res.status(403).json({ error: 'Only staff can view full details' });
+        }
+        const foundItem = await FoundItem.findById(req.params.id);
+        if (!foundItem) {
+            return res.status(404).json({ error: 'Item not found' });
+        }
+        res.status(200).json(foundItem);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
 // POST /founditems - Create new found item (STAFF only)
 router.post('/', async (req, res) => {

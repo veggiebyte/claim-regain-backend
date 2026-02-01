@@ -51,9 +51,9 @@ const foundItemSchema = new mongoose.Schema(
         answer: String,
       },
     ],
-    imageUrl: {
-      type: String,
-    },
+    
+ imageUrls: [String],
+
     claims: [
       {
         type: mongoose.Schema.Types.ObjectId,
