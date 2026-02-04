@@ -78,6 +78,41 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// PUT /claims/:id - Update claim (VISITOR can update their own PENDING claims)
+router.put('/:id', async (req, res) => {
+  try {
+    const claim = await Claim.findById(req.params.id);
+    
+    if (!claim) {
+      return res.status(404).json({ error: 'Claim not found' });
+    }
+
+    // Only the claimant can update their own claim
+    if (claim.claimantId.toString() !== req.user._id) {
+      return res.status(403).json({ error: 'Not authorized to update this claim' });
+    }
+
+    // Only allow updating PENDING claims
+    if (claim.status !== 'PENDING') {
+      return res.status(400).json({ error: 'Can only edit pending claims' });
+    }
+
+    // Update allowed fields
+    const { answers, additionalDetails, contactEmail, contactPhone } = req.body;
+    
+    claim.answers = answers || claim.answers;
+    claim.additionalDetails = additionalDetails !== undefined ? additionalDetails : claim.additionalDetails;
+    claim.contactEmail = contactEmail || claim.contactEmail;
+    claim.contactPhone = contactPhone || claim.contactPhone;
+    
+    await claim.save();
+
+    res.status(200).json(claim);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // PUT /claims/:id/review - Review claim (STAFF only)
 router.put('/:id/review', async (req, res) => {
   try {
