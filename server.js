@@ -8,6 +8,8 @@ const logger = require('morgan');
 
 mongoose.connect(process.env.MONGODB_URI);
 
+const PORT = process.env.PORT
+
 mongoose.connection.on('connected', () => {
   console.log(`Connected to MongoDB ${mongoose.connection.name}.`);
 });
@@ -29,6 +31,6 @@ app.use('/users', usersRouter);
 app.use('/founditems', foundItemsRouter);
 app.use('/claims', claimsRouter);
 
-app.listen(3000, () => {
+app.listen(PORT, () => {
   console.log('The express app is ready!');
 });
