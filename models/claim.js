@@ -50,15 +50,17 @@ const claimSchema = new mongoose.Schema(
     pickupNotes: {
       type: String,
     },
-    contactEmail: { 
-      type: String, 
-      required: true },
-    
-      contactPhone: { 
-        type: String, 
-        required: true }
+    contactEmail: {
+      type: String,
+      required: true
+    },
+
+    contactPhone: {
+      type: String,
+      required: true
+    }
   },
-  
+
   {
     timestamps: true,
   }
