@@ -8,7 +8,7 @@ const FoundItem = require('../models/founditem.js');
 // GET /founditems - List all found items (public view - VAGUE descriptions only)
 router.get('/', async (req, res) => {
     try {
-        const foundItems = await FoundItem.find({ status: 'FOUND' })
+        const foundItems = await FoundItem.find({ status: { $in: ['FOUND', 'CLAIMED'] } })
             .select('publicDescription category color dateFound locationFound _id')
             .sort({ createdAt: -1 });
         res.status(200).json(foundItems);
